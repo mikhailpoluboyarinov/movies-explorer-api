@@ -4,7 +4,7 @@ const ForbiddenError = require('../errors/forbiddenError403');
 const BadRequestError = require('../errors/badRequestError400');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
+  Movie.find({ ownerId: req.user._id })
     .then((movies) => res.send(movies))
     .catch((err) => {
       next(err);
@@ -12,42 +12,7 @@ module.exports.getMovies = (req, res, next) => {
 };
 
 module.exports.createMovie = (req, res, next) => {
-  const {
-    country,
-    director,
-    duration,
-    year,
-    description,
-    image,
-    trailerLink,
-    thumbnail,
-    movieId,
-    nameRU,
-    nameEN,
-  } = req.body;
-
-  const owner = req.user._id;
-
-  Movie.findOne({ movieId })
-    .then((movie) => {
-      if (movie !== null && owner === movie.owner) {
-        next(new ForbiddenError('Фильм уже в базе данных.'));
-      }
-      return Movie.create({
-        country,
-        director,
-        duration,
-        year,
-        description,
-        image,
-        trailerLink,
-        thumbnail,
-        movieId,
-        nameRU,
-        nameEN,
-        owner,
-      });
-    })
+  Movie.create({ ...req.body, owner: req.user._id })
     .then((movie) => res.send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {

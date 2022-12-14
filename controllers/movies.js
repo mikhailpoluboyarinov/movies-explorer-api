@@ -27,7 +27,7 @@ module.exports.deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
   const ownerId = req.user._id;
 
-  Movie.find({ movieId })
+  Movie.findById({ _id: movieId })
     .then((movie) => {
       if (movie === null) {
         return next(new NotFoundError('Передан несуществующий _id фильма.'));
